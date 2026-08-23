@@ -1,0 +1,104 @@
+name: Daily Upshift Job Post Pipeline
+
+on:
+  schedule:
+    # Slot 1: 01:30 PM IST (08:00 UTC) every day
+    - cron: '0 8 * * *'
+    # Slot 2: 06:00 PM IST (12:30 UTC) every day
+    - cron: '30 12 * * *'
+  workflow_dispatch:
+    inputs:
+      category:
+        description: 'Job Category (Select "auto" to use timetable.json)'
+        required: true
+        default: 'auto'
+        type: choice
+        options:
+          - 'auto'
+          - 'engineering'
+          - 'data'
+          - 'devops'
+          - 'product'
+      day_override:
+        description: 'Day of week override (Optional)'
+        required: false
+        type: choice
+        default: 'today'
+        options:
+          - 'today'
+          - 'monday'
+          - 'tuesday'
+          - 'wednesday'
+          - 'thursday'
+          - 'friday'
+          - 'saturday'
+          - 'sunday'
+      slot_override:
+        description: 'Time slot override (Optional)'
+        required: false
+        type: choice
+        default: 'current_time'
+        options:
+          - 'current_time'
+          - '1'
+          - '2'
+      location:
+        description: 'Target location in India (Optional)'
+        required: false
+        default: ''
+
+jobs:
+  curate_and_publish:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Scheduled / Manual Upshift Pipeline
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
+          TELEGRAM_DRY_RUN: 'false'
+        run: |
+          ARGS="--clear-tmp"
+
+          # 1. Category Handling
+          CATEGORY="${{ inputs.category }}"
+          if [ "$CATEGORY" != "auto" ] && [ "$CATEGORY" != "" ]; then
+            ARGS="$ARGS --category $CATEGORY"
+          else
+            ARGS="$ARGS --auto-schedule"
+          fi
+
+          # 2. Day Override
+          DAY="${{ inputs.day_override }}"
+          if [ "$DAY" != "today" ] && [ "$DAY" != "" ]; then
+            ARGS="$ARGS --day $DAY"
+          fi
+
+          # 3. Slot Override
+          SLOT="${{ inputs.slot_override }}"
+          if [ "$SLOT" != "current_time" ] && [ "$SLOT" != "" ]; then
+            ARGS="$ARGS --slot $SLOT"
+          fi
+
+          # 4. Location Override
+          LOC="${{ inputs.location }}"
+          if [ "$LOC" != "" ]; then
+            ARGS="$ARGS --location \"$LOC\""
+          fi
+
+          echo "🚀 Executing: python main.py $ARGS"
+          python main.py $ARGS

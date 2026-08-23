@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upshift. - Job Post Template</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Google+Sans+Flex:wght@400..800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div id="post" class="post_body">
+      <!-- Background Graphic Layer -->
+      <div class="bg_img">
+        <img src="{{ bg_frame | default('./assets/frame-blue.png') }}" alt="Background pattern" />
+      </div>
+
+      <!-- Foreground Content Layer (Variant 2: Job Card) -->
+      <div class="post-section variant-job">
+        <!-- Top Bar (Header) -->
+        <header class="post-navbar">
+          <p id="job-source" class="source-tag">{{ source_tag | default('Software Engineer job via Indeed') }}</p>
+          <p id="brand-handle" class="handle-tag">@upshift.app</p>
+        </header>
+
+        <!-- Bottom-Aligned Content Cluster -->
+        <div class="job-bottom-group">
+          <!-- Main Job Details Section -->
+          <main class="job-main">
+            <p id="company-name" class="company-name">{{ company_name | default('Top Company') }}</p>
+            <h1 id="job-title" class="job-title">
+              <span>{{ title_line1 }}</span>
+              {% if title_line2 %}<span>{{ title_line2 }}</span>{% endif %}
+            </h1>
+            <div id="skills-list" class="skills-list">
+              {% for skill in skills %}
+              <span class="skill-badge">{{ skill }}</span>
+              {% endfor %}
+            </div>
+          </main>
+
+          <!-- Footer Bar (Location, Salary, Apply Button) -->
+          <footer class="job-footer-bar">
+            <div class="job-meta-left">
+              <p id="job-location" class="job-location">{{ location | default('Bengaluru, India') }}</p>
+              <p id="job-salary" class="job-salary">{{ salary | default('₹ Not Disclosed') }}</p>
+            </div>
+            <div class="job-meta-right">
+              <button id="apply-btn" class="btn-apply" type="button">Apply today</button>
+            </div>
+          </footer>
+
+          <!-- Carousel Dots Indicator -->
+          <div id="carousel-dots" class="carousel-dots">
+            {% for i in range(total_slides | default(12)) %}
+            <span class="dot {% if i == (current_slide | default(1)) %}active{% endif %}"></span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

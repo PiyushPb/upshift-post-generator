@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upshift. - Thumbnail Template</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Google+Sans+Flex:wght@400..800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div id="post" class="post_body">
+      <!-- Background Graphic Layer -->
+      <div class="bg_img">
+        <img src="{{ bg_frame | default('./assets/frame-yellow.png') }}" alt="Background pattern" />
+      </div>
+
+      <!-- Foreground Content Layer (Variant 1: Thumbnail) -->
+      <div class="post-section variant-thumbnail">
+        <!-- Top Bar -->
+        <header class="post-navbar">
+          <div class="meta-details">
+            <p><strong>Date:</strong> {{ date_str | default('Today') }}</p>
+            <p><strong>Location:</strong> {{ location_str | default('Bengaluru, IN') }}</p>
+          </div>
+          <div class="reference-code">
+            <p>{{ ref_code | default('UP-2026') }}</p>
+          </div>
+        </header>
+
+        <!-- Main Body -->
+        <main class="post-main">
+          <h1 class="main-heading">
+            <span>{{ heading_line1 | default('Top Tech') }}</span>
+            <span>{{ heading_line2 | default('Jobs') }}</span>
+          </h1>
+          <p class="sub-heading">
+            {{ sub_heading | default('Curated from top job platforms to help you find the right opportunity faster.') }}
+          </p>
+        </main>
+
+        <!-- Footer Bar -->
+        <footer class="post-footer">
+          <div class="brand-info">
+            <p class="brand-name">Upshift<span class="dot-accent">.</span></p>
+            <p class="brand-handle">@upshift.app</p>
+          </div>
+          <div class="category-info">
+            <p>{{ category_text | default('Jobs 2026') }}</p>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </body>
+</html>

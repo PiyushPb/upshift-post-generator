@@ -1,0 +1,129 @@
+{
+  "timezone": "Asia/Kolkata",
+  "slots": {
+    "slot_1": {
+      "time_ist": "13:30",
+      "time_utc": "08:00",
+      "description": "Afternoon Tech Batch (1:30 PM IST)"
+    },
+    "slot_2": {
+      "time_ist": "18:00",
+      "time_utc": "12:30",
+      "description": "Evening Tech Batch (6:00 PM IST)"
+    }
+  },
+  "schedule": {
+    "monday": {
+      "slot_1": {
+        "category": "engineering",
+        "label": "Software Engineering (Full Stack & Backend)",
+        "location": "Bengaluru",
+        "search_terms": ["Full Stack Developer", "Backend Developer", "Java Developer"],
+        "top_n": 10
+      },
+      "slot_2": {
+        "category": "data",
+        "label": "Data Analytics & Business Intelligence",
+        "location": "Bengaluru",
+        "search_terms": ["Data Analyst", "Business Analyst", "Power BI Developer"],
+        "top_n": 10
+      }
+    },
+    "tuesday": {
+      "slot_1": {
+        "category": "devops",
+        "label": "DevOps & Cloud Infrastructure",
+        "location": "Hyderabad",
+        "search_terms": ["DevOps Engineer", "Cloud Engineer", "AWS Engineer"],
+        "top_n": 10
+      },
+      "slot_2": {
+        "category": "engineering",
+        "label": "Frontend & Mobile Development",
+        "location": "Bengaluru",
+        "search_terms": ["Frontend Developer", "React Developer", "Flutter Developer"],
+        "top_n": 10
+      }
+    },
+    "wednesday": {
+      "slot_1": {
+        "category": "data",
+        "label": "AI & Machine Learning Engineering",
+        "location": "Bengaluru",
+        "search_terms": ["Machine Learning Engineer", "Data Scientist", "AI Engineer"],
+        "top_n": 10
+      },
+      "slot_2": {
+        "category": "product",
+        "label": "Product Management & UX Design",
+        "location": "Mumbai",
+        "search_terms": ["Product Manager", "UI/UX Designer", "Product Designer"],
+        "top_n": 10
+      }
+    },
+    "thursday": {
+      "slot_1": {
+        "category": "engineering",
+        "label": "Backend & Distributed Systems",
+        "location": "Pune",
+        "search_terms": ["Backend Engineer", "Python Developer", "Golang Developer"],
+        "top_n": 10
+      },
+      "slot_2": {
+        "category": "devops",
+        "label": "SRE & Platform Engineering",
+        "location": "Bengaluru",
+        "search_terms": ["Site Reliability Engineer", "Platform Engineer", "Kubernetes Engineer"],
+        "top_n": 10
+      }
+    },
+    "friday": {
+      "slot_1": {
+        "category": "data",
+        "label": "Data Engineering & Analytics",
+        "location": "Hyderabad",
+        "search_terms": ["Data Engineer", "SQL Developer", "ETL Developer"],
+        "top_n": 10
+      },
+      "slot_2": {
+        "category": "engineering",
+        "label": "Software & Web Development",
+        "location": "Gurugram",
+        "search_terms": ["Software Engineer", "React Developer", "Node.js Developer"],
+        "top_n": 10
+      }
+    },
+    "saturday": {
+      "slot_1": {
+        "category": "engineering",
+        "label": "Weekend Engineering Spotlight",
+        "location": "Bengaluru",
+        "search_terms": ["Software Engineer", "Full Stack Developer"],
+        "top_n": 10
+      },
+      "slot_2": {
+        "category": "data",
+        "label": "Weekend Data & AI Spotlight",
+        "location": "Bengaluru",
+        "search_terms": ["Data Analyst", "Data Scientist"],
+        "top_n": 10
+      }
+    },
+    "sunday": {
+      "slot_1": {
+        "category": "product",
+        "label": "Product & Growth Opportunities",
+        "location": "Bengaluru",
+        "search_terms": ["Product Manager", "Product Analyst", "UI/UX Designer"],
+        "top_n": 10
+      },
+      "slot_2": {
+        "category": "devops",
+        "label": "Cloud & Cybersecurity",
+        "location": "Bengaluru",
+        "search_terms": ["Cloud Architect", "Security Engineer", "DevOps Engineer"],
+        "top_n": 10
+      }
+    }
+  }
+}

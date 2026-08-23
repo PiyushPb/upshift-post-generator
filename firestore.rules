@@ -1,0 +1,60 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions for strict validation
+    function hasRequiredBatchFields(data) {
+      return data.keys().hasAll(['batch_id', 'post_id', 'category', 'location', 'total_jobs', 'job_ids', 'status', 'created_at'])
+        && data.batch_id is string
+        && data.post_id is string
+        && data.category is string
+        && data.total_jobs is number
+        && data.job_ids is list;
+    }
+
+    function hasRequiredJobFields(data) {
+      return data.keys().hasAll(['job_id', 'post_id', 'batch_id', 'batch_rank', 'title', 'company', 'location', 'salary', 'job_url', 'site', 'saved_at'])
+        && data.job_id is string
+        && data.post_id is string
+        && data.batch_id is string
+        && data.title is string
+        && data.company is string
+        && data.job_url is string;
+    }
+
+    // 1. Curated Batches Collection
+    match /batches/{batchId} {
+      // Allow public read for web, app and social discovery
+      allow read: if true;
+      
+      // Allow creation only if strict schema is satisfied
+      allow create: if hasRequiredBatchFields(request.resource.data);
+      
+      // Prevent unauthorized updates and deletions from public clients
+      allow update, delete: if false;
+    }
+
+    // 2. Individual Jobs Collection
+    match /jobs/{jobId} {
+      // Allow public read for job seekers and frontend search
+      allow read: if true;
+      
+      // Allow creation only if strict schema is satisfied
+      allow create: if hasRequiredJobFields(request.resource.data);
+      
+      // Prevent tampering or deleting existing job listings
+      allow update, delete: if false;
+    }
+
+    // 3. Metadata & Counters Collection
+    match /metadata/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // 4. Default Deny for any unlisted collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upshift. - End Note / Disclaimer Template</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Google+Sans+Flex:wght@400..800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div id="post" class="post_body">
+      <!-- Background Graphic Layer -->
+      <div class="bg_img">
+        <img src="{{ bg_frame | default('./assets/frame-pink.png') }}" alt="Background pattern" />
+      </div>
+
+      <!-- Foreground Content Layer (Variant 3: End Note) -->
+      <div class="post-section variant-endnote">
+        <!-- Logo Header -->
+        <header class="endnote-header">
+          <h1 class="brand-logo">Upshift<span class="dot-accent">.</span></h1>
+        </header>
+
+        <!-- Main Disclaimer Content -->
+        <main class="endnote-main">
+          <h2 class="disclaimer-title">Disclaimer</h2>
+
+          <div class="disclaimer-body">
+            <p>
+              <strong>Upshift is an independent job discovery platform</strong> provided solely for
+              informational purposes. We curate and display
+              <strong>publicly available job listings</strong> across engineering, design, data,
+              product, and other professional roles, sourced from official company career pages and
+              publicly accessible job platforms at the time of posting.
+              <strong>Upshift does not own, operate, or control</strong> any job listing and
+              <strong>has no affiliation, partnership, or relationship</strong> with the
+              companies whose opportunities are displayed.
+            </p>
+
+            <p>
+              <strong>Upshift is not a recruiter, hiring agency, or intermediary.</strong> We
+              <strong>do not collect or process job applications</strong>,
+              <strong>do not submit resumes or candidate information</strong>, and
+              <strong>do not participate in hiring decisions</strong>. Users are
+              <strong
+                >redirected to official employer websites or employer-designated application
+                platforms</strong
+              >
+              to apply for roles. Job availability, requirements, and hiring timelines are
+              <strong>solely determined by the hiring companies</strong> and may change without
+              notice.
+            </p>
+
+            <p>
+              Upshift may provide
+              <strong>separate, optional tools or features</strong> that operate
+              <strong>independently from the job discovery platform</strong> and are offered
+              <strong>for informational or personal use only</strong>. Any data or documents
+              submitted to such tools are <strong>not shared with employers</strong>,
+              <strong>not used for recruitment, screening, or evaluation</strong>, and
+              <strong
+                >not connected to or associated with any job listing or application process</strong
+              >. If you are a company representative and wish to request removal of a listing or
+              raise a concern, <strong>please contact us via direct message</strong>.
+            </p>
+
+            <p class="team-signoff">~ Team Upshift</p>
+          </div>
+        </main>
+
+        <!-- Carousel Dots Indicator (Last dot active for End Note) -->
+        <footer class="endnote-footer">
+          <div id="carousel-dots" class="carousel-dots">
+            {% for i in range(total_slides | default(12)) %}
+            <span class="dot {% if i == (current_slide | default(11)) %}active{% endif %}"></span>
+            {% endfor %}
+          </div>
+        </footer>
+      </div>
+    </div>
+  </body>
+</html>
