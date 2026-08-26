@@ -54,3 +54,12 @@ class TelegramConfig:
     bot_token: str = field(default_factory=lambda: os.getenv("TELEGRAM_BOT_TOKEN", ""))
     chat_id: str = field(default_factory=lambda: os.getenv("TELEGRAM_CHAT_ID", ""))
     dry_run: bool = field(default_factory=lambda: os.getenv("TELEGRAM_DRY_RUN", "true").lower() == "true")
+
+    @property
+    def chat_ids(self) -> List[str]:
+        """Returns a list of clean Telegram chat IDs parsed from comma/space separated values."""
+        raw = self.chat_id or ""
+        # Support comma-separated or space-separated chat IDs
+        raw_list = [c.strip() for c in raw.replace(";", ",").split(",") if c.strip()]
+        return raw_list
+

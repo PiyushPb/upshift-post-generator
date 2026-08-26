@@ -2,10 +2,10 @@ name: Daily Upshift Job Post Pipeline
 
 on:
   schedule:
-    # Slot 1: 01:30 PM IST (08:00 UTC) every day
-    - cron: '0 8 * * *'
-    # Slot 2: 06:00 PM IST (12:30 UTC) every day
-    - cron: '30 12 * * *'
+    # Slot 1: 01:30 PM IST (~08:00 UTC) - scheduled at 07:50 UTC to account for runner startup & avoid peak queue delay
+    - cron: '50 7 * * *'
+    # Slot 2: 06:00 PM IST (~12:30 UTC) - scheduled at 12:20 UTC to avoid peak 12:30 queue delay and deliver punctually at 6:00 PM IST
+    - cron: '20 12 * * *'
   workflow_dispatch:
     inputs:
       category:
@@ -50,6 +50,8 @@ on:
 jobs:
   curate_and_publish:
     runs-on: macos-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -102,3 +104,15 @@ jobs:
 
           echo "🚀 Executing: python main.py $ARGS"
           python main.py $ARGS
+
+      - name: Commit and push updated post counter
+        if: always()
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/config/post_counter.json
+          if ! git diff --quiet --staged; then
+            git commit -m "chore: increment sequential post counter [skip ci]"
+            git push
+          fi
+

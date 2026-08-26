@@ -19,7 +19,7 @@ class TelegramPublisher:
 
     def send_message(self, text: str, chat_id: Optional[str] = None, parse_mode: str = "HTML") -> bool:
         """Sends a text message to the specified Telegram chat/channel."""
-        target_chat = chat_id or self.config.chat_id
+        target_chat = chat_id or (self.config.chat_ids[0] if self.config.chat_ids else "")
         if not self.config.bot_token or not target_chat:
             logger.warning("Telegram Bot Token or Chat ID not configured.")
             return False
@@ -40,19 +40,19 @@ class TelegramPublisher:
             response = requests.post(url, json=payload, timeout=15)
             data = response.json()
             if response.status_code == 200 and data.get("ok"):
-                logger.info("✅ Sent Telegram message successfully.")
+                logger.info(f"✅ Sent Telegram message successfully to [{target_chat}].")
                 time.sleep(1.2)
                 return True
             else:
-                logger.error(f"❌ Telegram API Error: {data.get('description', response.text)}")
+                logger.error(f"❌ Telegram API Error ({target_chat}): {data.get('description', response.text)}")
                 return False
         except Exception as e:
-            logger.error(f"❌ Failed to send Telegram message: {e}")
+            logger.error(f"❌ Failed to send Telegram message to [{target_chat}]: {e}")
             return False
 
     def send_photo(self, photo_path: Path, chat_id: Optional[str] = None, caption: Optional[str] = None) -> bool:
         """Sends a single photo with optional caption."""
-        target_chat = chat_id or self.config.chat_id
+        target_chat = chat_id or (self.config.chat_ids[0] if self.config.chat_ids else "")
         if not self.config.bot_token or not target_chat:
             return False
 
@@ -73,21 +73,22 @@ class TelegramPublisher:
                 response = requests.post(url, data=data, files=files, timeout=25)
                 res_json = response.json()
                 if response.status_code == 200 and res_json.get("ok"):
-                    logger.info(f"✅ Sent photo '{photo_path.name}' to Telegram.")
+                    logger.info(f"✅ Sent photo '{photo_path.name}' to Telegram [{target_chat}].")
                     time.sleep(1.2)
                     return True
                 else:
-                    logger.error(f"❌ Failed to send photo: {res_json.get('description')}")
+                    logger.error(f"❌ Failed to send photo to [{target_chat}]: {res_json.get('description')}")
                     return False
         except Exception as e:
-            logger.error(f"❌ Photo upload error: {e}")
+            logger.error(f"❌ Photo upload error to [{target_chat}]: {e}")
             return False
 
     def send_media_group(self, image_paths: List[Path], chat_id: Optional[str] = None, caption: Optional[str] = None) -> bool:
         """Sends up to 10 photos as a single Telegram media album."""
-        target_chat = chat_id or self.config.chat_id
+        target_chat = chat_id or (self.config.chat_ids[0] if self.config.chat_ids else "")
         if not self.config.bot_token or not target_chat or not image_paths:
             return False
+
 
         if self.config.dry_run:
             logger.info(f"📢 [DRY RUN] Would send media group of {len(image_paths)} images.")
@@ -146,41 +147,49 @@ class TelegramPublisher:
         chat_id: Optional[str] = None
     ) -> bool:
         """
-        Sends complete Instagram asset kit to personal chat:
+        Sends complete Instagram asset kit to personal chat(s):
         1. All 12 carousel cards sent sequentially / as albums for 1-click mobile download.
         2. Clean copy-paste Instagram caption (caption.txt).
         3. Formatted WhatsApp & Telegram share links list.
         """
-        target_chat = chat_id or self.config.chat_id
-        logger.info(f"📲 Dispatching complete Instagram Post Kit to Telegram chat [{target_chat}]...")
+        target_chats = [chat_id] if chat_id else self.config.chat_ids
+        if not target_chats:
+            logger.warning("No Telegram Chat IDs configured.")
+            return False
 
-        # 1. Gather all rendered PNGs in proper order
-        png_files = sorted(list(carousel_folder.glob("*.png")))
-        if png_files:
-            logger.info(f"📸 Sending {len(png_files)} carousel slides...")
-            # Send in 2 albums (e.g. 0-9 and 10-11) or sequential photos
-            self.send_media_group(png_files[:10], chat_id=target_chat, caption="📸 <b>Instagram Carousel Slides (1-10)</b>")
-            if len(png_files) > 10:
-                time.sleep(1.5)
-                self.send_media_group(png_files[10:], chat_id=target_chat, caption="📸 <b>Instagram Carousel Slides (11-12)</b>")
+        logger.info(f"📲 Dispatching complete Instagram Post Kit to Telegram chat(s) {target_chats}...")
 
-        # 2. Send Instagram Caption
-        time.sleep(1.2)
-        caption_msg = f"📝 <b>INSTAGRAM CAPTION (COPY & PASTE):</b>\n\n<code>{caption_text}</code>"
-        self.send_message(caption_msg, chat_id=target_chat, parse_mode="HTML")
+        all_success = True
+        for target_chat in target_chats:
+            logger.info(f"📤 Sending kit to user/chat [{target_chat}]...")
+            # 1. Gather all rendered PNGs in proper order
+            png_files = sorted(list(carousel_folder.glob("*.png")))
+            if png_files:
+                logger.info(f"📸 Sending {len(png_files)} carousel slides to [{target_chat}]...")
+                # Send in 2 albums (e.g. 0-9 and 10-11) or sequential photos
+                self.send_media_group(png_files[:10], chat_id=target_chat, caption="📸 <b>Instagram Carousel Slides (1-10)</b>")
+                if len(png_files) > 10:
+                    time.sleep(1.5)
+                    self.send_media_group(png_files[10:], chat_id=target_chat, caption="📸 <b>Instagram Carousel Slides (11-12)</b>")
 
-        # 3. Send WhatsApp & Telegram Direct Apply Links List
-        time.sleep(1.2)
-        import re
-        html_links = ""
-        for line in share_links_text.splitlines():
-            cleaned_line = re.sub(r"\*(.*?)\*", r"<b>\1</b>", line)
-            html_links += cleaned_line + "\n"
+            # 2. Send Instagram Caption
+            time.sleep(1.2)
+            caption_msg = f"📝 <b>INSTAGRAM CAPTION (COPY & PASTE):</b>\n\n<code>{caption_text}</code>"
+            self.send_message(caption_msg, chat_id=target_chat, parse_mode="HTML")
 
-        links_msg = f"🔗 <b>WHATSAPP & TELEGRAM SHARE LIST:</b>\n\n{html_links.strip()}"
-        self.send_message(links_msg, chat_id=target_chat, parse_mode="HTML")
+            # 3. Send WhatsApp & Telegram Direct Apply Links List
+            time.sleep(1.2)
+            import re
+            html_links = ""
+            for line in share_links_text.splitlines():
+                cleaned_line = re.sub(r"\*(.*?)\*", r"<b>\1</b>", line)
+                html_links += cleaned_line + "\n"
 
-        return True
+            links_msg = f"🔗 <b>WHATSAPP & TELEGRAM SHARE LIST:</b>\n\n{html_links.strip()}"
+            self.send_message(links_msg, chat_id=target_chat, parse_mode="HTML")
+            time.sleep(1.5)
+
+        return all_success
 
     def publish_to_group_or_channel(
         self,

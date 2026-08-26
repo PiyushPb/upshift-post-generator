@@ -81,6 +81,51 @@ class FirebaseClient:
                 fields[k] = {"stringValue": str(v)}
         return fields
 
+    def _from_firestore_fields(self, fields: Dict[str, Any]) -> Dict[str, Any]:
+        """Converts Firestore REST typed fields back to a standard Python dict."""
+        data = {}
+        for k, v in fields.items():
+            if not isinstance(v, dict):
+                continue
+            if "stringValue" in v:
+                data[k] = v["stringValue"]
+            elif "integerValue" in v:
+                data[k] = int(v["integerValue"])
+            elif "doubleValue" in v:
+                data[k] = float(v["doubleValue"])
+            elif "booleanValue" in v:
+                data[k] = v["booleanValue"]
+            elif "mapValue" in v:
+                data[k] = self._from_firestore_fields(v["mapValue"].get("fields", {}))
+            elif "arrayValue" in v:
+                arr = []
+                for item in v["arrayValue"].get("values", []):
+                    if isinstance(item, dict):
+                        if "stringValue" in item:
+                            arr.append(item["stringValue"])
+                        elif "integerValue" in item:
+                            arr.append(int(item["integerValue"]))
+                        elif "doubleValue" in item:
+                            arr.append(float(item["doubleValue"]))
+                        elif "booleanValue" in item:
+                            arr.append(item["booleanValue"])
+                data[k] = arr
+        return data
+
+    def get_document(self, collection: str, doc_id: str) -> Optional[Dict[str, Any]]:
+        """Fetches and parses a document from Firestore REST API."""
+        url = f"{self.base_url}/{collection}/{doc_id}?key={self.api_key}"
+        try:
+            res = requests.get(url, timeout=5)
+            if res.status_code == 200:
+                doc = res.json()
+                raw_fields = doc.get("fields", {})
+                return self._from_firestore_fields(raw_fields)
+            return None
+        except Exception as e:
+            logger.debug(f"Firestore get_document {collection}/{doc_id} failed: {e}")
+            return None
+
     def save_document(self, collection: str, doc_id: str, data: Dict[str, Any]) -> bool:
         """Creates or updates a document in Firestore via REST API."""
         url = f"{self.base_url}/{collection}/{doc_id}?key={self.api_key}"
@@ -103,6 +148,7 @@ class FirebaseClient:
         except Exception as e:
             logger.error(f"❌ Firestore save error for {collection}/{doc_id}: {e}")
             return False
+
 
     def save_batch_post(
         self,
