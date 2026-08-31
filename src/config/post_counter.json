@@ -1,8 +1,8 @@
 {
-  "global_counter": 10,
+  "global_counter": 11,
   "categories": {
     "engineering": 4,
-    "data": 4,
+    "data": 5,
     "devops": 4,
     "product": 1
   }
