@@ -98,6 +98,11 @@ def main():
         default=None,
         help="Path to an existing JSON/CSV file in tmp/data to rank and render without re-scraping"
     )
+    parser.add_argument(
+        "--enforce-window",
+        action="store_true",
+        help="Strictly enforce that execution happens within the legitimate delivery window (prevents delayed runs at night)"
+    )
 
     args = parser.parse_args()
 
@@ -113,6 +118,16 @@ def main():
             day_override=args.day,
             slot_override=args.slot
         )
+
+        if args.enforce_window:
+            in_window, window_msg = TimetableScheduler.is_within_delivery_window(slot_cfg["slot"])
+            if not in_window:
+                logger.warning(f"🛑 [WINDOW GUARD] {window_msg}")
+                logger.info("Exiting cleanly to prevent sending messages at inappropriate times.")
+                return
+            else:
+                logger.info(f"⏰ [WINDOW GUARD] {window_msg}")
+
         if not category:
             category = slot_cfg["category"]
         if not search_terms:
@@ -149,7 +164,7 @@ def main():
         ml_ranker = MLJobSelector()
         top_jobs, cat_meta = ml_ranker.select_top_jobs(df, category=category, top_n=top_n)
         
-        post_id = PostCounter.get_and_increment(category)
+        post_id = PostCounter.get_current_id()
 
         renderer = CardRenderer()
         renderer.render_carousel(
@@ -200,6 +215,9 @@ def main():
                     share_links_text=share_text,
                     channel_id=args.channel
                 )
+
+        # Post succeeded: Commit incremented ID to Firebase Firestore
+        PostCounter.increment_and_commit(category)
 
         if args.clear_tmp:
             shutil.rmtree(TMP_DIR, ignore_errors=True)

@@ -51,6 +51,7 @@ yarn-error.log*
 .env
 .env.local
 .env.*.local
+src/config/post_counter.json
 
 # Generated / Output Artifacts (Generated images/exports)
 tmp/

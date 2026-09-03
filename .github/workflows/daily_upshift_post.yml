@@ -2,10 +2,10 @@ name: Daily Upshift Job Post Pipeline
 
 on:
   schedule:
-    # Slot 1: 01:30 PM IST (~08:00 UTC) - scheduled at 07:50 UTC to account for runner startup & avoid peak queue delay
-    - cron: '50 7 * * *'
-    # Slot 2: 06:00 PM IST (~12:30 UTC) - scheduled at 12:20 UTC to avoid peak 12:30 queue delay and deliver punctually at 6:00 PM IST
-    - cron: '20 12 * * *'
+    # Slot 1: 01:00 PM IST (07:30 UTC) -> triggers at 07:25 UTC (~12:55 PM IST) for delivery right at 1:00 PM IST
+    - cron: '25 7 * * *'
+    # Slot 2: 06:00 PM IST (12:30 UTC) -> triggers at 12:25 UTC (~5:55 PM IST) for delivery right at 6:00 PM IST
+    - cron: '25 12 * * *'
   workflow_dispatch:
     inputs:
       category:
@@ -49,9 +49,9 @@ on:
 
 jobs:
   curate_and_publish:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -66,6 +66,10 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
+
+      - name: Verify Google Chrome
+        run: |
+          google-chrome --version || which google-chrome || echo "Chrome path check complete"
 
       - name: Run Scheduled / Manual Upshift Pipeline
         env:
@@ -84,16 +88,28 @@ jobs:
             ARGS="$ARGS --auto-schedule"
           fi
 
-          # 2. Day Override
-          DAY="${{ inputs.day_override }}"
-          if [ "$DAY" != "today" ] && [ "$DAY" != "" ]; then
-            ARGS="$ARGS --day $DAY"
-          fi
-
-          # 3. Slot Override
+          # 2. Slot Determination (Scheduled vs Manual Dispatch)
           SLOT="${{ inputs.slot_override }}"
           if [ "$SLOT" != "current_time" ] && [ "$SLOT" != "" ]; then
             ARGS="$ARGS --slot $SLOT"
+          elif [ "${{ github.event_name }}" = "schedule" ]; then
+            CRON_SCHEDULE="${{ github.event.schedule }}"
+            echo "⏰ Triggered by schedule cron: '$CRON_SCHEDULE'"
+            if [[ "$CRON_SCHEDULE" == *" 7 "* ]] || [[ "$CRON_SCHEDULE" == *" 8 "* ]]; then
+              echo "🎯 Mapped to Slot 1 (Afternoon 1:00 PM IST)"
+              ARGS="$ARGS --slot 1 --enforce-window"
+            elif [[ "$CRON_SCHEDULE" == *" 12 "* ]] || [[ "$CRON_SCHEDULE" == *" 13 "* ]]; then
+              echo "🎯 Mapped to Slot 2 (Evening 6:00 PM IST)"
+              ARGS="$ARGS --slot 2 --enforce-window"
+            else
+              ARGS="$ARGS --enforce-window"
+            fi
+          fi
+
+          # 3. Day Override
+          DAY="${{ inputs.day_override }}"
+          if [ "$DAY" != "today" ] && [ "$DAY" != "" ]; then
+            ARGS="$ARGS --day $DAY"
           fi
 
           # 4. Location Override
@@ -104,15 +120,3 @@ jobs:
 
           echo "🚀 Executing: python main.py $ARGS"
           python main.py $ARGS
-
-      - name: Commit and push updated post counter
-        if: always()
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add src/config/post_counter.json
-          if ! git diff --quiet --staged; then
-            git commit -m "chore: increment sequential post counter [skip ci]"
-            git push
-          fi
-

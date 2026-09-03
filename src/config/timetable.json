@@ -2,9 +2,9 @@
   "timezone": "Asia/Kolkata",
   "slots": {
     "slot_1": {
-      "time_ist": "13:30",
-      "time_utc": "08:00",
-      "description": "Afternoon Tech Batch (1:30 PM IST)"
+      "time_ist": "13:00",
+      "time_utc": "07:30",
+      "description": "Afternoon Tech Batch (1:00 PM IST)"
     },
     "slot_2": {
       "time_ist": "18:00",

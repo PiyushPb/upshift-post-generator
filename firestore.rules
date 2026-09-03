@@ -47,6 +47,10 @@ service cloud.firestore {
     }
 
     // 3. Metadata & Counters Collection
+    match /counters/{document=**} {
+      allow read, write: if true;
+    }
+
     match /metadata/{document=**} {
       allow read: if true;
       allow write: if false;

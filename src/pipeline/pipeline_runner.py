@@ -89,8 +89,8 @@ class JobPipeline:
             logger.warning("No jobs qualified for selection.")
             return []
 
-        # Sequential Post ID starting from UP-0001
-        post_id = PostCounter.get_and_increment(category)
+        # Sequential Post ID: get active ID without incrementing
+        post_id = PostCounter.get_current_id()
 
         # 5. Render Carousel, caption.txt & share_links.txt into tmp/posts/
         carousel_folder = None
@@ -145,7 +145,10 @@ class JobPipeline:
                     channel_id=telegram_channel_id
                 )
 
-        # 8. Clean up temp data if requested
+        # 8. Post succeeded: Commit incremented ID to Firebase Firestore
+        PostCounter.increment_and_commit(category)
+
+        # 9. Clean up temp data if requested
         if cleanup_after:
             logger.info("🧹 Cleaning up temporary workspace files (tmp/)...")
             try:
