@@ -35,6 +35,9 @@ Thumbs.db
 
 # Node / Web (if used for render tools)
 node_modules/
+web/node_modules/
+web/dist/
+.firebase/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
